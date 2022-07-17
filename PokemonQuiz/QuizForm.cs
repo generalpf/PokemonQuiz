@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using PokemonCommon;
+using PokeApiNet;
 
 namespace PokemonQuiz
 {
@@ -23,15 +19,15 @@ namespace PokemonQuiz
         private int score;
         private Pokemon rightPokemon = null;
         private SilhouetteForm silhouetteForm = null;
+        private PokeApiClient pokeApiClient = null;
         
-        private IPokemonDataLayer pokemonDataLayer;
         private Random random;
 
         public QuizForm()
         {
             InitializeComponent();
 
-            pokemonDataLayer = new Db4oDataLayer();  // WebScraper();
+            pokeApiClient = new PokeApiClient();
             random = new Random();
         }
 
@@ -50,63 +46,69 @@ namespace PokemonQuiz
             }
         }
 
-        private void SetUpQuestion()
+        private async void SetUpQuestion()
         {
             this.Cursor = Cursors.WaitCursor;
 
-            int r1 = random.Next(1, pokemonDataLayer.GetNumberOfPokemon());
-            Pokemon p1 = pokemonDataLayer.GetPokemonByNumber(r1);
+            /*
+             * the API is coming back with over 1,100 Pokemon.
+             * NamedApiResourceList<Pokemon> somePokemon = await pokeApiClient.GetNamedResourcePageAsync<Pokemon>();
+             * int pokemonCount = somePokemon.Count;
+             */
+            int pokemonCount = 905; 
+
+            int r1 = random.Next(1, pokemonCount + 1);
+            Pokemon p1 = await pokeApiClient.GetResourceAsync<Pokemon>(r1);
 
             int r2 = r1;
             while (r2 == r1)
             {
-                r2 = random.Next(1, pokemonDataLayer.GetNumberOfPokemon());
+                r2 = random.Next(1, pokemonCount + 1);
             }
-            Pokemon p2 = pokemonDataLayer.GetPokemonByNumber(r2);
+            Pokemon p2 = await pokeApiClient.GetResourceAsync<Pokemon>(r2);
 
             int r3 = r2;
             while (r3 == r2 || r3 == r1)
             {
-                r3 = random.Next(1, pokemonDataLayer.GetNumberOfPokemon());
+                r3 = random.Next(1, pokemonCount + 1);
             }
-            Pokemon p3 = pokemonDataLayer.GetPokemonByNumber(r3);
+            Pokemon p3 = await pokeApiClient.GetResourceAsync<Pokemon>(r3);
 
-            this.rightAnswer = random.Next(1, 3);
-            this.rightPokemon = rightAnswer == 1 ? p1 : rightAnswer == 2 ? p2 : p3;
+            this.rightAnswer = random.Next(0, 3);
+            this.rightPokemon = rightAnswer == 0 ? p1 : rightAnswer == 1 ? p2 : p3;
 
             int qt = random.Next(0, 6);
             switch (qt)
             {
                 case 0:
-                    lblQuestion.Text = "Which Pokemon has weight = " + rightPokemon.Weight + "?";
+                    lblQuestion.Text = "Which Pokemon has weight = " + rightPokemon.Weight + " hectograms?";
                     break;
-                /*case 1:
-                    lblQuestion.Text = "Which Pokemon has height = " + rightPokemon.Height + "?";
-                    break;*/
+                case 1:
+                    lblQuestion.Text = "Which Pokemon has height = " + rightPokemon.Height + " decimetres?";
+                    break;
                 case 2:
-                    lblQuestion.Text = "Which Pokemon has species = " + rightPokemon.Species + "?";
+                    lblQuestion.Text = "Which Pokemon has species = " + rightPokemon.Species.Name + "?";
                     break;
                 case 3:
                     StringBuilder buf = new StringBuilder();
-                    for (int i = 0; i < rightPokemon.Abilities.Length; i++)
+                    for (int i = 0; i < rightPokemon.Abilities.Count; i++)
                     {
-                        buf.Append(rightPokemon.Abilities[i]);
-                        if (i < rightPokemon.Abilities.Length - 1)
+                        buf.Append(rightPokemon.Abilities[i].Ability.Name);
+                        if (i < rightPokemon.Abilities.Count - 1)
                             buf.Append(", ");
                     }
                     lblQuestion.Text = "Which Pokemon has abilit(ies) = " + buf.ToString() + "?";
                     break;
                 case 4:
                     buf = new StringBuilder();
-                    for (int i = 0; i < rightPokemon.Types.Length; i++)
+                    for (int i = 0; i < rightPokemon.Types.Count; i++)
                     {
-                        buf.Append(rightPokemon.Types[i]);
-                        if (i < rightPokemon.Types.Length - 1)
+                        buf.Append(rightPokemon.Types[i].Type.Name);
+                        if (i < rightPokemon.Types.Count - 1)
                             buf.Append(", ");
                     }
                     lblQuestion.Text = "Which Pokemon has type(s) = " + buf.ToString() + "?";
                     break;
-                case 1:
                 case 5:
                     lblQuestion.Text = "Which Pokemon is this?";
                     break;
@@ -116,24 +118,34 @@ namespace PokemonQuiz
             groupBox2.Text = p2.Name;
             groupBox3.Text = p3.Name;
 
-            if (qt == 1 || qt == 5)
+            Bitmap bitmap1 = GetFrontDefaultBitmap(p1);
+            Bitmap bitmap2 = GetFrontDefaultBitmap(p2);
+            Bitmap bitmap3 = GetFrontDefaultBitmap(p3);
+
+            if (qt == 5)
             {
-                Bitmap silhouette = new Bitmap(Bitmap.FromStream(new MemoryStream(rightPokemon.Picture)));
-                Silhouettify(silhouette);
                 silhouetteForm = new SilhouetteForm();
-                silhouetteForm.Silhouette = silhouette;
+                silhouetteForm.OriginalBitmap = rightAnswer == 0 ? bitmap1 : rightAnswer == 1 ? bitmap2 : bitmap3;
                 silhouetteForm.Show();
 
                 pictureBox1.Image = pictureBox2.Image = pictureBox3.Image = null;
             }
             else
             {
-                pictureBox1.Image = new Bitmap(Bitmap.FromStream(new MemoryStream(p1.Picture))).GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, ThumbnailCallback, IntPtr.Zero);
-                pictureBox2.Image = new Bitmap(Bitmap.FromStream(new MemoryStream(p2.Picture))).GetThumbnailImage(pictureBox2.Width, pictureBox2.Height, ThumbnailCallback, IntPtr.Zero);
-                pictureBox3.Image = new Bitmap(Bitmap.FromStream(new MemoryStream(p3.Picture))).GetThumbnailImage(pictureBox3.Width, pictureBox3.Height, ThumbnailCallback, IntPtr.Zero);
+                pictureBox1.Image = bitmap1.GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, ThumbnailCallback, IntPtr.Zero);
+                pictureBox2.Image = bitmap2.GetThumbnailImage(pictureBox2.Width, pictureBox2.Height, ThumbnailCallback, IntPtr.Zero);
+                pictureBox3.Image = bitmap3.GetThumbnailImage(pictureBox3.Width, pictureBox3.Height, ThumbnailCallback, IntPtr.Zero);
             }
 
             this.Cursor = Cursors.Default;
+        }
+
+        private Bitmap GetFrontDefaultBitmap(Pokemon p)
+        {
+            System.Net.WebRequest request = System.Net.WebRequest.Create(p.Sprites.FrontDefault);
+            System.Net.WebResponse response = request.GetResponse();
+            System.IO.Stream responseStream = response.GetResponseStream();
+            return new Bitmap(responseStream);
         }
 
         private bool ThumbnailCallback()
@@ -143,24 +155,24 @@ namespace PokemonQuiz
 
         private void cmdP1_Click(object sender, EventArgs e)
         {
-            HandleAnswer(1);
+            HandleAnswer(0);
         }
 
         private void cmdP2_Click(object sender, EventArgs e)
         {
-            HandleAnswer(2);
+            HandleAnswer(1);
         }
 
         private void cmdP3_Click(object sender, EventArgs e)
         {
-            HandleAnswer(3);
+            HandleAnswer(2);
         }
 
         private void HandleAnswer(int clicked)
         {
             if (silhouetteForm != null)
             {
-                silhouetteForm.Silhouette = new Bitmap(Bitmap.FromStream(new MemoryStream(rightPokemon.Picture)));
+                silhouetteForm.ShowOriginalBitmap();
                 Thread.Sleep(2000);
 
                 silhouetteForm.Close();
@@ -201,21 +213,6 @@ namespace PokemonQuiz
         {
             cmdP1.Enabled = cmdP2.Enabled = cmdP3.Enabled = false;
             cmdStartQuiz.Enabled = true;
-        }
-
-        private void Silhouettify(Bitmap bitmap)
-        {
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    Color color = bitmap.GetPixel(x, y);
-                    if (color.R != 255 || color.G != 255 || color.B != 255)
-                    {
-                        bitmap.SetPixel(x, y, Color.Black);
-                    }
-                }
-            }
         }
     }
 }

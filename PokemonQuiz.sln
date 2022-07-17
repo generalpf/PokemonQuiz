@@ -1,30 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonQuiz", "PokemonQuiz\PokemonQuiz.csproj", "{3A3C4FCB-ADE0-474D-A6D7-4DF5A751C97D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabasePopulator", "DatabasePopulator\DatabasePopulator.csproj", "{75EC517E-26E4-42DB-B633-B97867E16CAB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonCommon", "PokemonCommon\PokemonCommon.csproj", "{BE18451B-5A2B-48BD-B954-643087384323}"
-EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://generalpf.visualstudio.com/defaultcollection
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = PokemonQuiz\\PokemonQuiz.csproj
-		SccProjectName1 = PokemonQuiz
-		SccLocalPath1 = PokemonQuiz
-		SccProjectUniqueName2 = DatabasePopulator\\DatabasePopulator.csproj
-		SccProjectName2 = DatabasePopulator
-		SccLocalPath2 = DatabasePopulator
-		SccProjectUniqueName3 = PokemonCommon\\PokemonCommon.csproj
-		SccProjectName3 = PokemonCommon
-		SccLocalPath3 = PokemonCommon
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		DebugUnix|Any CPU = DebugUnix|Any CPU
@@ -46,32 +27,11 @@ Global
 		{3A3C4FCB-ADE0-474D-A6D7-4DF5A751C97D}.ReleaseUnix|Any CPU.Build.0 = Release|Any CPU
 		{3A3C4FCB-ADE0-474D-A6D7-4DF5A751C97D}.ReleaseWindows|Any CPU.ActiveCfg = Release|Any CPU
 		{3A3C4FCB-ADE0-474D-A6D7-4DF5A751C97D}.ReleaseWindows|Any CPU.Build.0 = Release|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.DebugUnix|Any CPU.ActiveCfg = Debug|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.DebugUnix|Any CPU.Build.0 = Debug|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.DebugWindows|Any CPU.ActiveCfg = Debug|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.DebugWindows|Any CPU.Build.0 = Debug|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.ReleaseUnix|Any CPU.ActiveCfg = Release|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.ReleaseUnix|Any CPU.Build.0 = Release|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.ReleaseWindows|Any CPU.ActiveCfg = Release|Any CPU
-		{75EC517E-26E4-42DB-B633-B97867E16CAB}.ReleaseWindows|Any CPU.Build.0 = Release|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.DebugUnix|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.DebugUnix|Any CPU.Build.0 = Debug|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.DebugWindows|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.DebugWindows|Any CPU.Build.0 = Debug|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.ReleaseUnix|Any CPU.ActiveCfg = Release|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.ReleaseUnix|Any CPU.Build.0 = Release|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.ReleaseWindows|Any CPU.ActiveCfg = Release|Any CPU
-		{BE18451B-5A2B-48BD-B954-643087384323}.ReleaseWindows|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4FA5E5B7-1AE4-46B0-B95A-95007211C9EE}
 	EndGlobalSection
 EndGlobal
