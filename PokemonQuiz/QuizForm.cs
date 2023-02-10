@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using PokeApiNet;
 
@@ -47,32 +49,27 @@ namespace PokemonQuiz
         {
             this.Cursor = Cursors.WaitCursor;
 
-            /*
-             * the API is coming back with over 1,100 Pokemon.
-             * NamedApiResourceList<Pokemon> somePokemon = await pokeApiClient.GetNamedResourcePageAsync<Pokemon>();
-             * int pokemonCount = somePokemon.Count;
-             */
-            int pokemonCount = 905;
+            NamedApiResourceList<PokemonSpecies> somePokemon = await pokeApiClient.GetNamedResourcePageAsync<PokemonSpecies>();
+            int pokemonCount = somePokemon.Count;
 
             int r1 = random.Next(1, pokemonCount + 1);
-            Pokemon p1 = await pokeApiClient.GetResourceAsync<Pokemon>(r1);
-
             int r2 = r1;
             while (r2 == r1)
             {
                 r2 = random.Next(1, pokemonCount + 1);
             }
-            Pokemon p2 = await pokeApiClient.GetResourceAsync<Pokemon>(r2);
-
             int r3 = r2;
             while (r3 == r2 || r3 == r1)
             {
                 r3 = random.Next(1, pokemonCount + 1);
             }
-            Pokemon p3 = await pokeApiClient.GetResourceAsync<Pokemon>(r3);
+
+            int[] numbers = new[] { r1, r2, r3 };
+            PokemonSpecies[] species = await Task.WhenAll(numbers.Select(n => pokeApiClient.GetResourceAsync<PokemonSpecies>(n)));
+            Pokemon[] pokemon = await Task.WhenAll(species.Select(s => pokeApiClient.GetResourceAsync(s.Varieties[random.Next(0, s.Varieties.Count)].Pokemon)));
 
             this.rightAnswer = random.Next(0, 3);
-            this.rightPokemon = rightAnswer == 0 ? p1 : rightAnswer == 1 ? p2 : p3;
+            this.rightPokemon = pokemon[rightAnswer];
 
             int qt = random.Next(0, 6);
             switch (qt)
@@ -111,27 +108,25 @@ namespace PokemonQuiz
                     break;
             }
 
-            groupBox1.Text = p1.Name;
-            groupBox2.Text = p2.Name;
-            groupBox3.Text = p3.Name;
+            groupBox1.Text = pokemon[0].Name;
+            groupBox2.Text = pokemon[1].Name;
+            groupBox3.Text = pokemon[2].Name;
 
-            Bitmap bitmap1 = GetFrontDefaultBitmap(p1);
-            Bitmap bitmap2 = GetFrontDefaultBitmap(p2);
-            Bitmap bitmap3 = GetFrontDefaultBitmap(p3);
+            Bitmap[] bitmaps = pokemon.Select(p => GetFrontDefaultBitmap(p)).ToArray();
 
             if (qt == 5)
             {
                 silhouetteForm = new SilhouetteForm();
-                silhouetteForm.OriginalBitmap = rightAnswer == 0 ? bitmap1 : rightAnswer == 1 ? bitmap2 : bitmap3;
+                silhouetteForm.OriginalBitmap = bitmaps[rightAnswer];
                 silhouetteForm.Show();
 
                 pictureBox1.Image = pictureBox2.Image = pictureBox3.Image = null;
             }
             else
             {
-                pictureBox1.Image = bitmap1.GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, ThumbnailCallback, IntPtr.Zero);
-                pictureBox2.Image = bitmap2.GetThumbnailImage(pictureBox2.Width, pictureBox2.Height, ThumbnailCallback, IntPtr.Zero);
-                pictureBox3.Image = bitmap3.GetThumbnailImage(pictureBox3.Width, pictureBox3.Height, ThumbnailCallback, IntPtr.Zero);
+                pictureBox1.Image = bitmaps[0].GetThumbnailImage(pictureBox1.Width, pictureBox1.Height, ThumbnailCallback, IntPtr.Zero);
+                pictureBox2.Image = bitmaps[1].GetThumbnailImage(pictureBox2.Width, pictureBox2.Height, ThumbnailCallback, IntPtr.Zero);
+                pictureBox3.Image = bitmaps[2].GetThumbnailImage(pictureBox3.Width, pictureBox3.Height, ThumbnailCallback, IntPtr.Zero);
             }
 
             this.Cursor = Cursors.Default;
