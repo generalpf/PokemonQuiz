@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -75,10 +76,10 @@ namespace PokemonQuiz
             switch (qt)
             {
                 case 0:
-                    lblQuestion.Text = $"Which Pokemon has weight = {rightPokemon.Weight} hectograms?";
+                    lblQuestion.Text = $"Which Pokemon has weight = {rightPokemon.Weight / 10.0} kilograms?";
                     break;
                 case 1:
-                    lblQuestion.Text = $"Which Pokemon has height = {rightPokemon.Height} decimetres?";
+                    lblQuestion.Text = $"Which Pokemon has height = {rightPokemon.Height / 10.0} metres?";
                     break;
                 case 2:
                     lblQuestion.Text = $"Which Pokemon has species = {rightPokemon.Species.Name}?";
@@ -134,6 +135,10 @@ namespace PokemonQuiz
 
         private Bitmap GetFrontDefaultBitmap(Pokemon p)
         {
+            if (p.Sprites.FrontDefault == null)
+            {
+                return QuestionMarkBitmap();
+            }
             System.Net.WebRequest request = System.Net.WebRequest.Create(p.Sprites.FrontDefault);
             System.Net.WebResponse response = request.GetResponse();
             System.IO.Stream responseStream = response.GetResponseStream();
@@ -165,7 +170,9 @@ namespace PokemonQuiz
             if (silhouetteForm != null)
             {
                 silhouetteForm.ShowOriginalBitmap();
+                this.Cursor = Cursors.WaitCursor;
                 Thread.Sleep(2000);
+                this.Cursor = Cursors.Default;
 
                 silhouetteForm.Close();
                 silhouetteForm = null;
@@ -182,6 +189,7 @@ namespace PokemonQuiz
             {
                 lblLastAnswerStatus.Text = $"INCORRECT! ({rightPokemon.Name})";
             }
+
             lblScore.Text = $"{score}/{currentQuestion}";
 
             if (++currentQuestion <= NUM_ROUNDS)
@@ -205,6 +213,29 @@ namespace PokemonQuiz
         {
             cmdP1.Enabled = cmdP2.Enabled = cmdP3.Enabled = false;
             cmdStartQuiz.Enabled = true;
+        }
+
+        private Bitmap questionMarkBitmap = null;
+        private Bitmap QuestionMarkBitmap()
+        {
+            if (questionMarkBitmap == null)
+            {
+                questionMarkBitmap = new Bitmap("placeholder.bmp");
+                RectangleF rectf = new RectangleF(0, 0, 100, 100);
+                Graphics g = Graphics.FromImage(questionMarkBitmap);
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                StringFormat format = new StringFormat()
+                {
+                    Alignment = StringAlignment.Center,
+                    LineAlignment = StringAlignment.Center
+                };
+                g.DrawString("?", SystemFonts.DefaultFont, Brushes.Black, rectf, format);
+                g.Flush();
+            }
+            return questionMarkBitmap;
         }
     }
 }
