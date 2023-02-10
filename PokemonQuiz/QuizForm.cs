@@ -16,9 +16,9 @@ namespace PokemonQuiz
 
         private bool quizRunning = false;
         private int currentQuestion;
+        private Pokemon[] pokemon;
         private int rightAnswer;
         private int score;
-        private Pokemon rightPokemon = null;
         private SilhouetteForm silhouetteForm = null;
         private PokeApiClient pokeApiClient = null;
         private Random random;
@@ -67,42 +67,30 @@ namespace PokemonQuiz
 
             int[] numbers = new[] { r1, r2, r3 };
             PokemonSpecies[] species = await Task.WhenAll(numbers.Select(n => pokeApiClient.GetResourceAsync<PokemonSpecies>(n)));
-            Pokemon[] pokemon = await Task.WhenAll(species.Select(s => pokeApiClient.GetResourceAsync(s.Varieties[random.Next(0, s.Varieties.Count)].Pokemon)));
+            pokemon = await Task.WhenAll(species.Select(s => pokeApiClient.GetResourceAsync(s.Varieties[random.Next(0, s.Varieties.Count)].Pokemon)));
 
             this.rightAnswer = random.Next(0, 3);
-            this.rightPokemon = pokemon[rightAnswer];
 
             int qt = random.Next(0, 6);
             switch (qt)
             {
                 case 0:
-                    lblQuestion.Text = $"Which Pokemon has weight = {rightPokemon.Weight / 10.0} kilograms?";
+                    lblQuestion.Text = $"Which Pokemon has weight = {pokemon[rightAnswer].Weight / 10.0} kilograms?";
                     break;
                 case 1:
-                    lblQuestion.Text = $"Which Pokemon has height = {rightPokemon.Height / 10.0} metres?";
+                    lblQuestion.Text = $"Which Pokemon has height = {pokemon[rightAnswer].Height / 10.0} metres?";
                     break;
                 case 2:
-                    lblQuestion.Text = $"Which Pokemon has species = {rightPokemon.Species.Name}?";
+                    string eggGroups = string.Join(", ", species[rightAnswer].EggGroups.Select(eg => eg.Name));
+                    lblQuestion.Text = $"Which Pokemon has egg groups = {eggGroups}?";
                     break;
                 case 3:
-                    StringBuilder buf = new StringBuilder();
-                    for (int i = 0; i < rightPokemon.Abilities.Count; i++)
-                    {
-                        buf.Append(rightPokemon.Abilities[i].Ability.Name);
-                        if (i < rightPokemon.Abilities.Count - 1)
-                            buf.Append(", ");
-                    }
-                    lblQuestion.Text = $"Which Pokemon has abilit(ies) = {buf}?";
+                    string abilities = string.Join(", ", pokemon[rightAnswer].Abilities.Select(a => a.Ability.Name));
+                    lblQuestion.Text = $"Which Pokemon has abilit(ies) = {abilities}?";
                     break;
                 case 4:
-                    buf = new StringBuilder();
-                    for (int i = 0; i < rightPokemon.Types.Count; i++)
-                    {
-                        buf.Append(rightPokemon.Types[i].Type.Name);
-                        if (i < rightPokemon.Types.Count - 1)
-                            buf.Append(", ");
-                    }
-                    lblQuestion.Text = $"Which Pokemon has type(s) = {buf}?";
+                    string types = string.Join(", ", pokemon[rightAnswer].Types.Select(t => t.Type.Name));
+                    lblQuestion.Text = $"Which Pokemon has type(s) = {types}?";
                     break;
                 case 5:
                     lblQuestion.Text = "Which Pokemon is this?";
@@ -187,7 +175,7 @@ namespace PokemonQuiz
             }
             else
             {
-                lblLastAnswerStatus.Text = $"INCORRECT! ({rightPokemon.Name})";
+                lblLastAnswerStatus.Text = $"INCORRECT! ({pokemon[rightAnswer].Name})";
             }
 
             lblScore.Text = $"{score}/{currentQuestion}";
@@ -220,7 +208,7 @@ namespace PokemonQuiz
         {
             if (questionMarkBitmap == null)
             {
-                questionMarkBitmap = new Bitmap("placeholder.bmp");
+                questionMarkBitmap = new Bitmap(100, 100);
                 RectangleF rectf = new RectangleF(0, 0, 100, 100);
                 Graphics g = Graphics.FromImage(questionMarkBitmap);
                 g.SmoothingMode = SmoothingMode.AntiAlias;
