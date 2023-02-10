@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.IO;
 using PokeApiNet;
 
 namespace PokemonQuiz
@@ -20,7 +18,6 @@ namespace PokemonQuiz
         private Pokemon rightPokemon = null;
         private SilhouetteForm silhouetteForm = null;
         private PokeApiClient pokeApiClient = null;
-        
         private Random random;
 
         public QuizForm()
@@ -55,7 +52,7 @@ namespace PokemonQuiz
              * NamedApiResourceList<Pokemon> somePokemon = await pokeApiClient.GetNamedResourcePageAsync<Pokemon>();
              * int pokemonCount = somePokemon.Count;
              */
-            int pokemonCount = 905; 
+            int pokemonCount = 905;
 
             int r1 = random.Next(1, pokemonCount + 1);
             Pokemon p1 = await pokeApiClient.GetResourceAsync<Pokemon>(r1);
@@ -81,13 +78,13 @@ namespace PokemonQuiz
             switch (qt)
             {
                 case 0:
-                    lblQuestion.Text = "Which Pokemon has weight = " + rightPokemon.Weight + " hectograms?";
+                    lblQuestion.Text = $"Which Pokemon has weight = {rightPokemon.Weight} hectograms?";
                     break;
                 case 1:
-                    lblQuestion.Text = "Which Pokemon has height = " + rightPokemon.Height + " decimetres?";
+                    lblQuestion.Text = $"Which Pokemon has height = {rightPokemon.Height} decimetres?";
                     break;
                 case 2:
-                    lblQuestion.Text = "Which Pokemon has species = " + rightPokemon.Species.Name + "?";
+                    lblQuestion.Text = $"Which Pokemon has species = {rightPokemon.Species.Name}?";
                     break;
                 case 3:
                     StringBuilder buf = new StringBuilder();
@@ -97,7 +94,7 @@ namespace PokemonQuiz
                         if (i < rightPokemon.Abilities.Count - 1)
                             buf.Append(", ");
                     }
-                    lblQuestion.Text = "Which Pokemon has abilit(ies) = " + buf.ToString() + "?";
+                    lblQuestion.Text = $"Which Pokemon has abilit(ies) = {buf}?";
                     break;
                 case 4:
                     buf = new StringBuilder();
@@ -107,13 +104,13 @@ namespace PokemonQuiz
                         if (i < rightPokemon.Types.Count - 1)
                             buf.Append(", ");
                     }
-                    lblQuestion.Text = "Which Pokemon has type(s) = " + buf.ToString() + "?";
+                    lblQuestion.Text = $"Which Pokemon has type(s) = {buf}?";
                     break;
                 case 5:
                     lblQuestion.Text = "Which Pokemon is this?";
                     break;
             }
-            
+
             groupBox1.Text = p1.Name;
             groupBox2.Text = p2.Name;
             groupBox3.Text = p3.Name;
@@ -188,9 +185,9 @@ namespace PokemonQuiz
             }
             else
             {
-                lblLastAnswerStatus.Text = "INCORRECT! (" + rightPokemon.Name + ")";
+                lblLastAnswerStatus.Text = $"INCORRECT! ({rightPokemon.Name})";
             }
-            lblScore.Text = score + "/" + currentQuestion;
+            lblScore.Text = $"{score}/{currentQuestion}";
 
             if (++currentQuestion <= NUM_ROUNDS)
             {
